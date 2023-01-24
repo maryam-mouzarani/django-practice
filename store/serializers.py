@@ -1,7 +1,7 @@
 from decimal import Decimal
 from store.models import Product, Collection, Review
 from rest_framework import serializers
-
+from django_filters.rest_framework import DjangoFilterBackend
 
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
