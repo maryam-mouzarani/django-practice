@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
-
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -43,13 +43,15 @@ INSTALLED_APPS = [
     'playground',
     'debug_toolbar',
     'store',
-    'store_custom',
+    'core',
     'tags',
     'likes'
 ]
 DJOSER={
     'SERIALIZERS':{
-        'user_create':'store_custom.serializers.UserCreateSerializer'
+        'user_create':'core.serializers.UserCreateSerializer',
+        'current_user': 'core.serializers.UserSerializer',
+
     }
 }
 MIDDLEWARE = [
@@ -153,6 +155,11 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
 }
+
+AUTH_USER_MODEL='core.User'
+
+
 SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
+    'AUTH_HEADER_TYPES': ('JWT',),
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
 }
