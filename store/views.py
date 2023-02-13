@@ -9,13 +9,13 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin,UpdateModelMixin,RetrieveModelMixin,DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
 
 from .filters import ProductFilter
 from .models import Collection, Product, OrderItem,Review,Cart,CartItem,Customer
 from .serializers import CollectionSerializer, ProductSerializer,ReviewSerializer, CartSerializer, CartItemSerializer,AddCartItemSerializer,UpdateCartItemSerializer,CustomerSerializer
 from .pagination import DefaultPagination
-
+from .permissions import IsAdminOrReadOnly
 class CartViewSet(CreateModelMixin, 
                   DestroyModelMixin,
                   GenericViewSet,
@@ -43,6 +43,7 @@ class ProductViewSet(ModelViewSet):
     filter_backends=[DjangoFilterBackend, SearchFilter,OrderingFilter]
     filterset_class=ProductFilter 
     pagination_class=DefaultPagination
+    permission_classes=[IsAdminOrReadOnly]
     
     search_fields=['title','description','collection__title']
     ordering_fields=['unit_price','last_update']
@@ -63,7 +64,7 @@ class ProductViewSet(ModelViewSet):
 class CollectionViewSet(ModelViewSet):
     queryset=  Collection.objects.annotate(products_count=Count('products')).all()
     serializer_class=CollectionSerializer
-    
+    permission_classes=[IsAdminOrReadOnly]
     def destroy(self, request, *args, **kwargs):
         if Product.objects.filter(collection_id=kwargs['pk']).count()>0:
             return Response({'error': 'Collection cannot be deleted because it includes one or more products.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -79,15 +80,13 @@ class ReviewViewSet(ModelViewSet):
              return Review.objects.filter(product_id=self.kwargs['product_pk'])
 
 
-class CustomerViewSet(RetrieveModelMixin,CreateModelMixin,UpdateModelMixin,GenericViewSet):
+class CustomerViewSet(ModelViewSet):
     queryset=Customer.objects.all()
     serializer_class=CustomerSerializer
-    
-    def get_permissions(self):
-        if self.request.method=='GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
-    @action(detail=False, methods=['GET','PUT'] )
+    permission_classes=[IsAdminUser]
+
+
+    @action(detail=False, methods=['GET','PUT'] ,permission_classes=['IsAuthenticated'])
     def me(self,request):
         (customer, created)=Customer.objects.get_or_create(user_id=request.user.id)
         if request.method=='GET':
