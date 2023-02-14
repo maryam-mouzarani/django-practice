@@ -1,5 +1,5 @@
 from decimal import Decimal
-from store.models import Product, Collection, Review,Cart,CartItem,Customer
+from store.models import Product, Collection, Review,Cart,CartItem,Customer,Order, OrderItem
 from rest_framework import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum,F
@@ -77,6 +77,21 @@ class CartSerializer(serializers.ModelSerializer):
     whole_price=serializers.SerializerMethodField(method_name='calculate_whole_price')
     def calculate_whole_price(self,crt:Cart):
         return sum([item.quantity*item.product.unit_price  for item in crt.items.all()])
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    product=SimpleProductSerializer() 
+    class Meta:
+        model=OrderItem
+        fields=['id','product','quantity','unit_price']
+class OrderSerializer(serializers.ModelSerializer):
+    id=serializers.UUIDField(read_only=True)
+    items=OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model=Order
+        fields=['id','customer_id','placed_at','payment_status','items']
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     
     class Meta:

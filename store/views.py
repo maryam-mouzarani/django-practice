@@ -9,13 +9,13 @@ from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.mixins import CreateModelMixin,UpdateModelMixin,RetrieveModelMixin,DestroyModelMixin
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser
+from rest_framework.permissions import IsAuthenticated, AllowAny,IsAdminUser,DjangoModelPermissions
 
 from .filters import ProductFilter
-from .models import Collection, Product, OrderItem,Review,Cart,CartItem,Customer
-from .serializers import CollectionSerializer, ProductSerializer,ReviewSerializer, CartSerializer, CartItemSerializer,AddCartItemSerializer,UpdateCartItemSerializer,CustomerSerializer
+from .models import Collection, Product, OrderItem,Review,Cart,CartItem,Customer,Order
+from .serializers import CollectionSerializer, ProductSerializer,ReviewSerializer, CartSerializer, CartItemSerializer,AddCartItemSerializer,UpdateCartItemSerializer,CustomerSerializer, OrderSerializer
 from .pagination import DefaultPagination
-from .permissions import IsAdminOrReadOnly
+from .permissions import IsAdminOrReadOnly, FullDjangoModelPermission,ViewHistoryPermission
 class CartViewSet(CreateModelMixin, 
                   DestroyModelMixin,
                   GenericViewSet,
@@ -86,7 +86,13 @@ class CustomerViewSet(ModelViewSet):
     permission_classes=[IsAdminUser]
 
 
-    @action(detail=False, methods=['GET','PUT'] ,permission_classes=['IsAuthenticated'])
+
+    @action(detail=True, permission_classes=[ViewHistoryPermission])
+    def history(self,request, pk):
+        return Response('ok')
+
+
+    @action(detail=False, methods=['GET','PUT'] ,permission_classes=[IsAuthenticated])
     def me(self,request):
         (customer, created)=Customer.objects.get_or_create(user_id=request.user.id)
         if request.method=='GET':
@@ -98,3 +104,7 @@ class CustomerViewSet(ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
+
+class OrderViewSet(ModelViewSet):
+    queryset=Order.objects.all()
+    serializer_class=OrderSerializer
