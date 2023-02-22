@@ -166,3 +166,6 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('JWT',),
     'ACCESS_TOKEN_LIFETIME': timedelta(days=5),
 }
+
+
+CELERY_BROKER_URL='redis://localhost:6379/1'
