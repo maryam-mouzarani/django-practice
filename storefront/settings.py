@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'djoser',
+    'silk',
     'playground',
     'debug_toolbar',
     'store',
@@ -55,7 +56,7 @@ DJOSER={
     }
 }
 MIDDLEWARE = [
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    #'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 INTERNAL_IPS = [
@@ -89,6 +91,8 @@ TEMPLATES = [
     },
 ]
 
+if DEBUG:
+    MIDDLEWARE +=    ['silk.middleware.SilkyMiddleware']
 WSGI_APPLICATION = 'storefront.wsgi.application'
 
 
