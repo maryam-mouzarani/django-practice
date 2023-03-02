@@ -6,5 +6,5 @@ from storefront.celery import celery
 def notify_customers(message):
     print('sending 10k emails')
     print(message)
-    sleep(10)
+    #sleep(10)
     print('Emails were sent successfully')

@@ -5,6 +5,10 @@ class WebSiteUser(HttpUser):
     wait_time=between(1,5)
 
     @task
+    def say_hello(self):
+        self.client.get('/playground/hello/')
+
+    @task
     def view_products(self):
         collection_id=randint(2,6)
         self.client.get(f'/store/products/?collection_id={collection_id}', name='/store/products')
